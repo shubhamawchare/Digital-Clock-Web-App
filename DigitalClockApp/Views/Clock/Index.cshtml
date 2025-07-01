@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Digital Clock";
+}
+
+<div class="container text-center mt-5">
+    <h1 class="mb-4">Digital Clock</h1>
+
+    <!-- 🕒 CLOCK DISPLAY -->
+    <div id="clock" class="display-4 font-weight-bold mb-3"></div>
+
+    <!-- 🌍 TIMEZONE SELECTOR -->
+    <select id="timezoneSelector" class="form-select w-50 mx-auto mb-4">
+        <option value="local">Your Local Time</option>
+        <option value="UTC">UTC</option>
+        <option value="Asia/Kolkata">India (IST)</option>
+        <option value="America/New_York">New York (EST)</option>
+    </select>
+
+    <!-- ⏰ ALARM INPUT -->
+    <input type="time" step="1" id="alarmTime" class="form-control w-50 mx-auto mb-2" />
+    <div id="alarmStatus" class="text-danger"></div>
+
+    <!-- 🌓 THEME TOGGLE -->
+    <button id="toggleTheme" class="btn btn-outline-primary mt-4">
+        <span id="themeIcon" class="bi bi-brightness-high-fill"></span>
+    </button>
+</div>
+
+@section Scripts {
+    <script>
+        let alarmSet = false;
+
+        function updateClock() {
+            const tz = document.getElementById('timezoneSelector').value;
+            let now = new Date();
+
+            if (tz !== "local") {
+                now = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
+            }
+
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+            checkAlarm(now);
+        }
+
+        function checkAlarm(now) {
+            const input = document.getElementById("alarmTime").value;
+            if (!input) return;
+
+            const [alarmHour, alarmMin, alarmSec] = input.split(":").map(Number);
+
+            const isMatch =
+                now.getHours() === alarmHour &&
+                now.getMinutes() === alarmMin &&
+                now.getSeconds() === alarmSec;
+
+            const alarmStatus = document.getElementById("alarmStatus");
+
+            if (isMatch && !alarmSet) {
+                alarmStatus.innerText = "⏰ Alarm! Time's up!";
+                alarmSet = true;
+                alert("⏰ Alarm! Time's up!");
+            } else if (!isMatch) {
+                alarmStatus.innerText = "";
+                alarmSet = false;
+            }
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.getElementById("toggleTheme").onclick = function () {
+            document.body.classList.toggle("dark-theme");
+            const icon = document.getElementById("themeIcon");
+            icon.classList.toggle("bi-brightness-high-fill");
+            icon.classList.toggle("bi-moon-stars-fill");
+        };
+
+        document.getElementById("timezoneSelector").onchange = updateClock;
+    </script>
+}
